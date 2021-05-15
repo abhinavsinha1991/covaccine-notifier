@@ -5,6 +5,8 @@
 *.so
 *.dylib
 
+covaccine-notifier
+
 # Test binary, built with `go test -c`
 *.test
 

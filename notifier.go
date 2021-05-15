@@ -4,10 +4,10 @@ import (
 	"net/smtp"
 )
 
-func sendMail(id, pass, body string) error {
+func sendMail(age, district, id, pass, body string) error {
 	msg := "From: " + id + "\n" +
 		"To: " + id + "\n" +
-		"Subject: Vaccination slots are available\n\n" +
+		"Subject: "+ district +" : Vaccination slots are available for age: " + age + "\n\n" +
 		"Vaccination slots are available at the following centers:\n\n" +
 		body
 

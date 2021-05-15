@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -120,7 +121,7 @@ func searchByPincode(pinCode string) error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to fetch appointment sessions")
 	}
-	return getAvailableSessions(response, age)
+	return getAvailableSessions(response, age, "")
 }
 
 func getStateIDByName(state string) (int, error) {
@@ -177,7 +178,7 @@ func searchByStateDistrict(age int, state, district string) error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to fetch appointment sessions")
 	}
-	return getAvailableSessions(response, age)
+	return getAvailableSessions(response, age, district)
 }
 
 // isPreferredAvailable checks for availability of preferences
@@ -189,7 +190,7 @@ func isPreferredAvailable(current, preference string) bool {
 	}
 }
 
-func getAvailableSessions(response []byte, age int) error {
+func getAvailableSessions(response []byte, age int, district string) error {
 	if response == nil {
 		log.Printf("Received unexpected response, rechecking after %v seconds", interval)
 		return nil
@@ -240,5 +241,5 @@ func getAvailableSessions(response []byte, age int) error {
 		return nil
 	}
 	log.Print("Found available slots, sending email")
-	return sendMail(email, password, buf.String())
+	return sendMail(strings.ToUpper(strconv.Itoa(int(age))), district, email, password, buf.String())
 }
