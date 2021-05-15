@@ -241,5 +241,5 @@ func getAvailableSessions(response []byte, age int, district string) error {
 		return nil
 	}
 	log.Print("Found available slots, sending email")
-	return sendMail(strings.ToUpper(strconv.Itoa(int(age))), district, email, password, buf.String())
+	return sendMail(strconv.Itoa(int(age)), district, email, password, buf.String())
 }
