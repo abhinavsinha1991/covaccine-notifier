@@ -41,5 +41,5 @@ dockers:
 - binaries:
   - controller
   image_templates:
-  - 'ghcr.io/prasadg193/covaccine-notifier:{{ .Tag }}'
+  - 'abhinavsinha1991/covaccine-notifier:{{ .Tag }}'
   dockerfile: 'Dockerfile'
