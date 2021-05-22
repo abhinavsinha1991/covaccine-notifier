@@ -14,7 +14,7 @@ import (
 var (
 	pinCode, state, district, email, password, date, vaccine, fee string
 
-	age, interval int
+	age, interval, dose int
 
 	rootCmd = &cobra.Command{
 		Use:   "covaccine-notifier [FLAGS]",
@@ -35,6 +35,7 @@ const (
 	searchIntervalEnv = "SEARCH_INTERVAL"
 	vaccineEnv        = "VACCINE"
 	feeEnv            = "FEE"
+	doseEnv           = "DOSE"
 
 	defaultSearchInterval = 60
 
@@ -55,6 +56,7 @@ func init() {
 	rootCmd.PersistentFlags().IntVarP(&interval, "interval", "i", getIntEnv(searchIntervalEnv), fmt.Sprintf("Interval to repeat the search. Default: (%v) second", defaultSearchInterval))
 	rootCmd.PersistentFlags().StringVarP(&vaccine, "vaccine", "v", os.Getenv(vaccineEnv), fmt.Sprintf("Vaccine preferences - covishield (or) covaxin. Default: No preference"))
 	rootCmd.PersistentFlags().StringVarP(&fee, "fee", "f", os.Getenv(feeEnv), fmt.Sprintf("Fee preferences - free (or) paid. Default: No preference"))
+	rootCmd.PersistentFlags().IntVarP(&dose, "dose", "o", getIntEnv(doseEnv), fmt.Sprintf("Dose preferences - 1 (or) 2."))
 }
 
 // Execute executes the main command
@@ -85,6 +87,9 @@ func checkFlags() error {
 	}
 	if !(fee == "" || fee == free || fee == paid) {
 		return errors.New("Invalid fee preference, please use free or paid")
+	}
+	if !(dose == 1 || dose == 2) {
+		return errors.New("Invalid dose preference, please use 1 or 2")
 	}
 	return nil
 }
@@ -128,7 +133,7 @@ func Run(args []string) error {
 func checkSlots() error {
 	// Search for slots
 	if len(pinCode) != 0 {
-		return searchByPincode(pinCode)
+		return searchByPincode(dose, pinCode)
 	}
-	return searchByStateDistrict(age, state, district)
+	return searchByStateDistrict(dose, age, state, district)
 }

@@ -18,8 +18,8 @@ import (
 // https://apisetu.gov.in/public/api/cowin
 const (
 	baseURL                     = "https://cdn-api.co-vin.in/api"
-	calendarByPinURLFormat      = "/v2/appointment/sessions/calendarByPin?pincode=%s&date=%s"
-	calendarByDistrictURLFormat = "/v2/appointment/sessions/calendarByDistrict?district_id=%d&date=%s"
+	calendarByPinURLFormat      = "/v2/appointment/sessions/public/calendarByPin?pincode=%s&date=%s"
+	calendarByDistrictURLFormat = "/v2/appointment/sessions/public/calendarByDistrict?district_id=%d&date=%s"
 	listStatesURLFormat         = "/v2/admin/location/states"
 	listDistrictsURLFormat      = "/v2/admin/location/districts/%d"
 )
@@ -72,6 +72,8 @@ type Appointments struct {
 			SessionID         string   `json:"session_id"`
 			Date              string   `json:"date"`
 			AvailableCapacity float64  `json:"available_capacity"`
+			AvailableCapDose1 float64  `json:"available_capacity_dose1"`
+			AvailableCapDose2 float64  `json:"available_capacity_dose2"`
 			MinAgeLimit       int      `json:"min_age_limit"`
 			Vaccine           string   `json:"vaccine"`
 			Slots             []string `json:"slots"`
@@ -116,12 +118,12 @@ func queryServer(path string) ([]byte, error) {
 	return bodyBytes, nil
 }
 
-func searchByPincode(pinCode string) error {
+func searchByPincode(dose int, pinCode string) error {
 	response, err := queryServer(fmt.Sprintf(calendarByPinURLFormat, pinCode, timeNow()))
 	if err != nil {
 		return errors.Wrap(err, "Failed to fetch appointment sessions")
 	}
-	return getAvailableSessions(response, age, "")
+	return getAvailableSessions(response, dose, age, pinCode)
 }
 
 func getStateIDByName(state string) (int, error) {
@@ -160,7 +162,7 @@ func getDistrictIDByName(stateID int, district string) (int, error) {
 	return 0, errors.New("Invalid district name passed")
 }
 
-func searchByStateDistrict(age int, state, district string) error {
+func searchByStateDistrict(dose int, age int, state, district string) error {
 	var err1 error
 	if stateID == 0 {
 		stateID, err1 = getStateIDByName(state)
@@ -178,7 +180,7 @@ func searchByStateDistrict(age int, state, district string) error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to fetch appointment sessions")
 	}
-	return getAvailableSessions(response, age, district)
+	return getAvailableSessions(response, dose, age, district)
 }
 
 // isPreferredAvailable checks for availability of preferences
@@ -190,7 +192,7 @@ func isPreferredAvailable(current, preference string) bool {
 	}
 }
 
-func getAvailableSessions(response []byte, age int, district string) error {
+func getAvailableSessions(response []byte, dose int, age int, district string) error {
 	if response == nil {
 		log.Printf("Received unexpected response, rechecking after %v seconds", interval)
 		return nil
@@ -201,13 +203,25 @@ func getAvailableSessions(response []byte, age int, district string) error {
 		return err
 	}
 	var buf bytes.Buffer
+
 	w := tabwriter.NewWriter(&buf, 1, 8, 1, '\t', 0)
 	for _, center := range appnts.Centers {
 		if !isPreferredAvailable(center.FeeType, fee) {
 			continue
 		}
 		for _, s := range center.Sessions {
-			if s.MinAgeLimit <= age && s.AvailableCapacity != 0 && isPreferredAvailable(s.Vaccine, vaccine) {
+
+			if dose == 1 {
+				if s.AvailableCapDose1 == 0 {
+					continue
+				}
+			} else {
+				if s.AvailableCapDose2 == 0 {
+					continue
+				}
+			}
+
+			if s.MinAgeLimit <= age && isPreferredAvailable(s.Vaccine, vaccine) {
 				fmt.Fprintln(w, fmt.Sprintf("Center\t%s", center.Name))
 				fmt.Fprintln(w, fmt.Sprintf("State\t%s", center.StateName))
 				fmt.Fprintln(w, fmt.Sprintf("District\t%s", center.DistrictName))
@@ -222,7 +236,13 @@ func getAvailableSessions(response []byte, age int, district string) error {
 				}
 				fmt.Fprintln(w, fmt.Sprintf("Sessions\t"))
 				fmt.Fprintln(w, fmt.Sprintf("\tDate\t%s", s.Date))
-				fmt.Fprintln(w, fmt.Sprintf("\tAvailableCapacity\t%f", s.AvailableCapacity))
+
+				if dose == 1 {
+					fmt.Fprintln(w, fmt.Sprintf("\tAvailableCapacityDose1\t%f", s.AvailableCapDose1))
+				} else {
+					fmt.Fprintln(w, fmt.Sprintf("\tAvailableCapacityDose2\t%f", s.AvailableCapDose2))
+				}
+
 				fmt.Fprintln(w, fmt.Sprintf("\tMinAgeLimit\t%d", s.MinAgeLimit))
 				fmt.Fprintln(w, fmt.Sprintf("\tVaccine\t%s", s.Vaccine))
 				fmt.Fprintln(w, fmt.Sprintf("\tSlots"))
@@ -241,5 +261,5 @@ func getAvailableSessions(response []byte, age int, district string) error {
 		return nil
 	}
 	log.Print("Found available slots, sending email")
-	return sendMail(strconv.Itoa(int(age)), district, email, password, buf.String())
+	return sendMail(strconv.Itoa(int(age)), strconv.Itoa(int(dose)), district, email, password, buf.String())
 }
