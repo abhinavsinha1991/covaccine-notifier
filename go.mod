@@ -1,4 +1,4 @@
-module github.com/PrasadG193/covaccine-notifier
+module github.com/abhinavsinha1991/covaccine-notifier
 
 go 1.16
 

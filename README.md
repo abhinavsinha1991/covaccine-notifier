@@ -6,19 +6,23 @@ covaccine-notifier periodically checks and sends email notifications for availab
 
 **Sample screenshot**
 
-![email notification](./screenshot.png)
+![email notification](./screenshot.jpeg)
 
 ## Installation
 
 ### Install the pre-compiled binary
 
 ```
-curl -sfL https://raw.githubusercontent.com/PrasadG193/covaccine-notifier/main/install.sh | sh
+curl -sfL https://raw.githubusercontent.com/abhinavsinha1991/covaccine-notifier/main/install.sh | sh
 ```
+
+### Latest Release
+
+https://github.com/abhinavsinha1991/covaccine-notifier/releases/tag/v4.0
 
 ### Docker
 ```
-docker pull ghcr.io/prasadg193/covaccine-notifier:v0.2.0
+docker pull abhinavsinha1991/covaccine-notifier:v4.0
 ```
 
 ## Usage
@@ -35,6 +39,7 @@ Usage:
 Flags:
   -a, --age int           Search appointment for age
   -d, --district string   Search by district name
+  -o, --dose int          Dose preferences - 1 (or) 2.
   -e, --email string      Email address to send notifications
   -f, --fee string        Fee preferences - free (or) paid. Default: No preference
   -h, --help              help for covaccine-notifier
@@ -55,19 +60,19 @@ Flags:
 #### Search by State and District
 
 ```
-covaccine-notifier --state Maharashtra --district Akola --age 27  --email <email-id> --password <email-password>
+covaccine-notifier --state Maharashtra --district Pune --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
 ```
 
 #### Search by Pin Code
 
 ```
-covaccine-notifier --pincode 444002 --age 27  --email <email-id> --password <email-password>
+covaccine-notifier --pincode 411047 --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
 ```
 
 ### Docker
 
 ```
-docker run --rm -ti ghcr.io/prasadg193/covaccine-notifier:v0.2.0  --state Maharashtra --district Akola --age 27  --email <email-id> --password <email-password>
+docker run --rm -ti abhinavsinha1991/covaccine-notifier:v4.0  covaccine-notifier --pincode 411047 --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
 ```
 
 ### Running on Kubernetes Cluster
@@ -75,7 +80,7 @@ docker run --rm -ti ghcr.io/prasadg193/covaccine-notifier:v0.2.0  --state Mahara
 If you are not willing to keep your terminal on all the time :smile:, you can also create a Pod on K8s cluster
 
 ```
-kubectl run covaccine-notifier --image=ghcr.io/prasadg193/covaccine-notifier:v0.2.0 --command -- /covaccine-notifier --state Maharashtra --district Akola --age 27  --email <email-id> --password <email-password>
+kubectl run covaccine-notifier-pune-18-dose1 --image=abhinavsinha1991/covaccine-notifier:v4.0 --command -- /covaccine-notifier --state Maharashtra --district Pune --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
 ```
 
 ## Contributing
