@@ -6,7 +6,7 @@ covaccine-notifier periodically checks and sends email notifications for availab
 
 **Sample screenshot for Dose 1**
 
-![email notification](./screenshot.jpeg)
+![email notification](./screenshot1.jpeg)
 
 ## Installation
 
