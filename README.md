@@ -4,7 +4,7 @@ CoWIN Portal Vaccine availability notifier
 
 covaccine-notifier periodically checks and sends email notifications for available slots for the next 7 days on CoWIN portal in a given area and age.
 
-**Sample screenshot**
+**Sample screenshot for Dose 1**
 
 ![email notification](./screenshot.jpeg)
 
