@@ -79,10 +79,10 @@ docker run --rm -ti abhinavsinha1991/covaccine-notifier:v5.0  covaccine-notifier
 
 ### Running on Kubernetes Cluster
 
-If you are not willing to keep your terminal on all the time :smile:, you can also create a Pod on K8s cluster
+If you are not willing to keep your terminal on all the time :smile:, you can also create a Deployment on K8s cluster
 
 ```
-kubectl run covaccine-notifier-pune-18-dose1 --image=abhinavsinha1991/covaccine-notifier:v5.0 --command -- /covaccine-notifier --state Maharashtra --district Pune --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
+kubectl create deployment covaccine-notifier-pune-18-dose1 --image=abhinavsinha1991/covaccine-notifier:v5.0 -- /covaccine-notifier --state Maharashtra --district Pune --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
 ```
 
 ## Contributing
