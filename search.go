@@ -26,7 +26,7 @@ const (
 
 var (
 	stateID, districtID int
-	lastAvailability string
+	lastAvailability1, lastAvailability2 string
 )
 
 type StateList struct {
@@ -111,7 +111,7 @@ func queryServer(path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Print("Response: ", string(bodyBytes))
+	//log.Print("Response: ", string(bodyBytes))
 
 	if resp.StatusCode != http.StatusOK {
 		// Sometimes the API returns "Unauthenticated access!", do not fail in that case
@@ -130,9 +130,9 @@ func searchByPincode(dose int, pinCode string) error {
 		return errors.Wrap(err, "Failed to fetch appointment sessions")
 	}
 
-	getAvailableSessions(response2, dose, age, district)
+	getAvailableSessions(response2, dose, age, district, &lastAvailability1)
 
-	return getAvailableSessions(response, dose, age, pinCode)
+	return getAvailableSessions(response, dose, age, pinCode, &lastAvailability2)
 }
 
 func getStateIDByName(state string) (int, error) {
@@ -192,9 +192,9 @@ func searchByStateDistrict(dose int, age int, state, district string) error {
 		return errors.Wrap(err, "Failed to fetch appointment sessions")
 	}
 
-	getAvailableSessions(response2, dose, age, district)
+	getAvailableSessions(response2, dose, age, district, &lastAvailability1)
 
-	return getAvailableSessions(response, dose, age, district)
+	return getAvailableSessions(response, dose, age, district, &lastAvailability2)
 }
 
 // isPreferredAvailable checks for availability of preferences
@@ -206,7 +206,7 @@ func isPreferredAvailable(current, preference string) bool {
 	}
 }
 
-func getAvailableSessions(response []byte, dose int, age int, district string) error {
+func getAvailableSessions(response []byte, dose int, age int, district string, lastAvailability *string) error {
 	if response == nil {
 		log.Printf("Received unexpected response, rechecking after %v seconds", interval)
 		return nil
@@ -277,14 +277,14 @@ func getAvailableSessions(response []byte, dose int, age int, district string) e
 
 	var mailSendError error
 
-	if(lastAvailability != buf.String()){
+	if(*lastAvailability != buf.String()){
 	 log.Print("Found available slots, sending email")
-	 log.Print(lastAvailability)
+	 //log.Print(buf.String())
+	 *lastAvailability=buf.String()
 	 mailSendError=sendMail(strconv.Itoa(int(age)), strconv.Itoa(int(dose)), district, email, password, buf.String())
-	 lastAvailability=buf.String()
 	}else{
 	 log.Print("Found available slots same as before, skip sending email")
-	 lastAvailability=buf.String()
+	 *lastAvailability=buf.String()
 	}
 
 	return mailSendError;
