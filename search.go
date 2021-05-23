@@ -26,6 +26,7 @@ const (
 
 var (
 	stateID, districtID int
+	lastAvailability string
 )
 
 type StateList struct {
@@ -85,6 +86,10 @@ func timeNow() string {
 	return time.Now().Format("02-01-2006")
 }
 
+func timeWeekAfter() string {
+	return time.Now().AddDate(0,0,7).Format("02-01-2006")
+}
+
 func queryServer(path string) ([]byte, error) {
 	req, err := http.NewRequest("GET", baseURL+path, nil)
 	if err != nil {
@@ -120,9 +125,13 @@ func queryServer(path string) ([]byte, error) {
 
 func searchByPincode(dose int, pinCode string) error {
 	response, err := queryServer(fmt.Sprintf(calendarByPinURLFormat, pinCode, timeNow()))
-	if err != nil {
+	response2, err2 := queryServer(fmt.Sprintf(calendarByDistrictURLFormat, districtID, timeWeekAfter()))
+	if err != nil && err2 != nil {
 		return errors.Wrap(err, "Failed to fetch appointment sessions")
 	}
+
+	getAvailableSessions(response2, dose, age, district)
+
 	return getAvailableSessions(response, dose, age, pinCode)
 }
 
@@ -177,9 +186,14 @@ func searchByStateDistrict(dose int, age int, state, district string) error {
 		}
 	}
 	response, err := queryServer(fmt.Sprintf(calendarByDistrictURLFormat, districtID, timeNow()))
-	if err != nil {
+	response2, err2 := queryServer(fmt.Sprintf(calendarByDistrictURLFormat, districtID, timeWeekAfter()))
+
+	if err != nil && err2 != nil {
 		return errors.Wrap(err, "Failed to fetch appointment sessions")
 	}
+
+	getAvailableSessions(response2, dose, age, district)
+
 	return getAvailableSessions(response, dose, age, district)
 }
 
@@ -260,6 +274,19 @@ func getAvailableSessions(response []byte, dose int, age int, district string) e
 		log.Printf("No slots available, rechecking after %v seconds", interval)
 		return nil
 	}
-	log.Print("Found available slots, sending email")
-	return sendMail(strconv.Itoa(int(age)), strconv.Itoa(int(dose)), district, email, password, buf.String())
+
+	var mailSendError error
+
+	if(lastAvailability != buf.String()){
+	 log.Print("Found available slots, sending email")
+	 log.Print(lastAvailability)
+	 mailSendError=sendMail(strconv.Itoa(int(age)), strconv.Itoa(int(dose)), district, email, password, buf.String())
+	 lastAvailability=buf.String()
+	}else{
+	 log.Print("Found available slots same as before, skip sending email")
+	 lastAvailability=buf.String()
+	}
+
+	return mailSendError;
+	//return sendMail(strconv.Itoa(int(age)), strconv.Itoa(int(dose)), district, email, password, buf.String())
 }
