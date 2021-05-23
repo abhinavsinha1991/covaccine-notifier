@@ -20,11 +20,11 @@ curl -sfL https://raw.githubusercontent.com/abhinavsinha1991/covaccine-notifier/
 
 ### Latest Release
 
-https://github.com/abhinavsinha1991/covaccine-notifier/releases/tag/v4.0
+https://github.com/abhinavsinha1991/covaccine-notifier/releases/tag/v5.0
 
 ### Docker
 ```
-docker pull abhinavsinha1991/covaccine-notifier:v4.0
+docker pull abhinavsinha1991/covaccine-notifier:v5.0
 ```
 
 ## Usage
@@ -74,7 +74,7 @@ covaccine-notifier --pincode 411047 --age 30 --dose 1 --email <username@gmail.co
 ### Docker
 
 ```
-docker run --rm -ti abhinavsinha1991/covaccine-notifier:v4.0  covaccine-notifier --pincode 411047 --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
+docker run --rm -ti abhinavsinha1991/covaccine-notifier:v5.0  covaccine-notifier --pincode 411047 --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
 ```
 
 ### Running on Kubernetes Cluster
@@ -82,7 +82,7 @@ docker run --rm -ti abhinavsinha1991/covaccine-notifier:v4.0  covaccine-notifier
 If you are not willing to keep your terminal on all the time :smile:, you can also create a Pod on K8s cluster
 
 ```
-kubectl run covaccine-notifier-pune-18-dose1 --image=abhinavsinha1991/covaccine-notifier:v4.0 --command -- /covaccine-notifier --state Maharashtra --district Pune --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
+kubectl run covaccine-notifier-pune-18-dose1 --image=abhinavsinha1991/covaccine-notifier:v5.0 --command -- /covaccine-notifier --state Maharashtra --district Pune --age 30 --dose 1 --email <username@gmail.com> --password <gmail-password>
 ```
 
 ## Contributing

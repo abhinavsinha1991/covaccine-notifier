@@ -37,7 +37,7 @@ const (
 	feeEnv            = "FEE"
 	doseEnv           = "DOSE"
 
-	defaultSearchInterval = 60
+	defaultSearchInterval = 5
 
 	covishield = "covishield"
 	covaxin    = "covaxin"
